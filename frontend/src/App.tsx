@@ -11,6 +11,12 @@ const nav: NavItem[] = [
 ];
 const demoDateOffset = (days: number) => { const date = new Date(); date.setHours(23, 59, 0, 0); date.setDate(date.getDate() + days); return date.toISOString(); };
 const isPastDue = (dueAt: string | null, status: WorkItem['status']) => Boolean(dueAt && new Date(dueAt).getTime() < Date.now() && !['Resolved', 'Closed'].includes(status));
+export function escapeCsvCell(value: string) {
+  // Prevent spreadsheet formula injection when CSVs are opened in Excel or similar tools.
+  const text = String(value ?? '');
+  const safe = /^\s*[=+\-@]/.test(text) ? `'${text}` : text;
+  return `"${safe.replaceAll('"', '""')}"`;
+}
 const dueLabel = (dueAt: string | null) => { if (!dueAt) return 'No due date'; const day = new Date(dueAt); const today = new Date(); today.setHours(0,0,0,0); const dueDay = new Date(day); dueDay.setHours(0,0,0,0); const diff = Math.round((dueDay.getTime() - today.getTime()) / 86400000); return diff < 0 ? `${Math.abs(diff)}d overdue` : diff === 0 ? 'Today' : diff === 1 ? 'Tomorrow' : day.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); };
 const sampleTasks = [
   { id: 'WT-1048', title: 'Review quarterly validation issue', team: 'Product Support', status: 'In progress', priority: 'High', dueAt: demoDateOffset(-2), product: 'Northstar Reporting', category: 'Customer ticket', requester: 'Demo Requester A', owner: 'Demo Support Owner A' }, 
@@ -184,13 +190,7 @@ export default function App() {
   function exportWorkItemsCsv() {
     const columns = ['Key', 'Title', 'Product', 'Category', 'Requester', 'Owner', 'Team', 'Status', 'Priority', 'Due date', 'SLA overdue'];
     const rows = filtered.map(item => [item.key, item.title, item.product, item.category, item.requester, item.owner, item.team, item.status, item.priority, item.due, item.overdue ? 'Yes' : 'No']);
-    const escapeCell = (value: string) => {
-      // Prevent spreadsheet formula injection when CSVs are opened in Excel or similar tools.
-      const text = String(value ?? '');
-      const safe = /^\s*[=+\-@]/.test(text) ? `'${text}` : text;
-      return `"${safe.replaceAll('"', '""')}"`;
-    };
-    const csv = [columns, ...rows].map(row => row.map(value => escapeCell(String(value ?? ''))).join(',')).join('\r\n');
+    const csv = [columns, ...rows].map(row => row.map(value => escapeCsvCell(String(value ?? ''))).join(',')).join('\r\n');
     const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
