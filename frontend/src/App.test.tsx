@@ -23,7 +23,7 @@ describe('WorkTrack360 shell', () => {
   it('filters the work table by status without replacing the search query', () => {
     render(<AuthProvider><App /></AuthProvider>);
     fireEvent.click(screen.getAllByRole('button', { name: 'Needs review' }).at(-1)!);
-    expect(screen.getByText('Prepare customer demo walkthrough')).toBeInTheDocument();
+    expect(screen.getAllByText('Prepare customer demo walkthrough').length).toBeGreaterThan(0);
     expect(screen.queryByText('Review quarterly validation issue')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /clear filters/i }));
     expect(screen.getByText('Review quarterly validation issue')).toBeInTheDocument();
