@@ -36,7 +36,7 @@ export default function App() {
   const [statusFilter, setStatusFilter] = useState<WorkItem['status'] | 'All'>('All');
   const [showNew, setShowNew] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskRow | null>(null);
-  const [tasks, setTasks] = useState<TaskRow[]>(sampleTasks.map(t => ({ ...t, id: null, key: t.id })));
+  const [tasks, setTasks] = useState<TaskRow[]>(sampleTasks.map(t => ({ ...t, id: null, key: t.id, product: '', category: '', requester: '', owner: '' })));
   const [dataMode, setDataMode] = useState<'sample' | 'live'>('sample');
   const [dataError, setDataError] = useState<string | null>(null);
   const [newTitle, setNewTitle] = useState('');
