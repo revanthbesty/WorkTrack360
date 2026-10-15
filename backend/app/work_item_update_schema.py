@@ -16,7 +16,7 @@ class WorkItemUpdate(BaseModel):
     @classmethod
     def clean_title(cls, value: str | None) -> str | None:
         if value is None:
-            return value
+            raise ValueError("Title cannot be null")
         value = value.strip()
         if not value:
             raise ValueError("Title cannot be blank")
@@ -25,13 +25,17 @@ class WorkItemUpdate(BaseModel):
     @field_validator("status")
     @classmethod
     def known_status(cls, value: str | None) -> str | None:
-        if value is not None and value not in STATUSES:
+        if value is None:
+            raise ValueError("Status cannot be null")
+        if value not in STATUSES:
             raise ValueError("Unknown status")
         return value
 
     @field_validator("priority")
     @classmethod
     def known_priority(cls, value: str | None) -> str | None:
-        if value is not None and value not in PRIORITIES:
+        if value is None:
+            raise ValueError("Priority cannot be null")
+        if value not in PRIORITIES:
             raise ValueError("Unknown priority")
         return value
