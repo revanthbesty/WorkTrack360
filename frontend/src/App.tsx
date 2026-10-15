@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useAuth } from './auth/AuthProvider';
-import { ApiError, workItemsApi, type TeamOption, type WorkItem } from './api/workItems';
+import { ApiError, workItemsApi, type TeamOption, type WorkItem, type WorkItemActivity } from './api/workItems';
 import { Activity, ArrowUpRight, Bell, CalendarClock, CheckCircle2, ChevronDown, CircleHelp, Command, Gauge, LayoutDashboard, ListTodo, Plus, Search, Settings2, ShieldCheck, Users, Workflow, Trash2 } from 'lucide-react';
 
 type NavItem = { label: string; icon: typeof Gauge };
@@ -53,6 +53,8 @@ export default function App() {
   const [newDueDate, setNewDueDate] = useState('');
   const [newTeamId, setNewTeamId] = useState('');
   const [liveTeams, setLiveTeams] = useState<TeamOption[]>([]);
+  const [activityItems, setActivityItems] = useState<WorkItemActivity[]>([]);
+  const [activityError, setActivityError] = useState<string | null>(null);
   const [newPriority, setNewPriority] = useState<WorkItem['priority']>('Medium');
   const [productOptionsConfig, setProductOptionsConfig] = useState(['Northstar Reporting', 'Orbit Compliance', 'Beacon Filing Suite', 'Summit Analytics']);
   const [categoryOptionsConfig, setCategoryOptionsConfig] = useState(['Customer ticket', 'Product owner', 'Software/Internal Team', 'Documentation', 'Demo & enablement']);
@@ -90,6 +92,19 @@ export default function App() {
     });
     return () => { cancelled = true; };
   }, [auth.accessToken, liveDataEnabled]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setActivityItems([]);
+    setActivityError(null);
+    if (!editingTask?.id || !auth.accessToken || !liveDataEnabled) return () => { cancelled = true; };
+    void workItemsApi.activity(auth.accessToken, editingTask.id).then(items => {
+      if (!cancelled) setActivityItems(items);
+    }).catch(error => {
+      if (!cancelled) setActivityError(error instanceof ApiError ? error.message : 'Could not load activity history.');
+    });
+    return () => { cancelled = true; };
+  }, [editingTask?.id, auth.accessToken, liveDataEnabled]);
 
   async function createWorkItem(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -199,6 +214,6 @@ export default function App() {
         </>}
       </section>
     </main>
-    {showNew && <div className="modal-backdrop" role="presentation" onMouseDown={e => {if(e.target === e.currentTarget) { setShowNew(false); setEditingTask(null); }}}><form className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" onSubmit={createWorkItem}><button type="button" className="modal-close" aria-label="Close" onClick={() => { setShowNew(false); setEditingTask(null); }}>×</button><div className="modal-icon"><Plus size={20}/></div><h2 id="modal-title">{editingTask ? 'Edit work item' : 'Create a work item'}</h2><p>{auth.accessToken ? (editingTask ? 'Update the title for this work item.' : 'Save a new work item to your authenticated workspace.') : 'Sign in and configure the API before saving work items.'}</p><label>Work item title<input value={newTitle} onChange={event => setNewTitle(event.target.value)} placeholder="e.g. Validate customer report" maxLength={240} required /></label><div className="form-grid"><label>Product<select aria-label="Product" value={newProduct} onChange={event => setNewProduct(event.target.value)}><option value="">Select product</option>{productOptions.map(value=><option key={value} value={value}>{value}</option>)}</select></label><label>Activity category<select aria-label="Activity category" value={newCategory} onChange={event => setNewCategory(event.target.value)}><option value="">Select category</option>{categoryOptions.map(value=><option key={value} value={value}>{value}</option>)}</select></label><label>Requester<input value={newRequester} onChange={event => setNewRequester(event.target.value)} placeholder="Who requested this?" maxLength={255}/></label><label>Owner<input value={newOwner} onChange={event => setNewOwner(event.target.value)} placeholder="Who owns the next action?" maxLength={255}/></label><label>Priority<select aria-label="Priority" value={newPriority} onChange={event=>setNewPriority(event.target.value as WorkItem['priority'])}>{priorities.map(value=><option key={value} value={value}>{value}</option>)}</select></label><label>Due date<input aria-label="Due date" type="date" value={newDueDate} onChange={event=>setNewDueDate(event.target.value)}/></label><label>Responsible team<select aria-label="Responsible team" value={newTeamId} onChange={event=>setNewTeamId(event.target.value)}><option value="">Unassigned</option>{liveTeams.map(team=><option key={team.id} value={team.id}>{team.name}</option>)}</select></label></div>{createError && <p role="alert" className="form-error">{createError}</p>}<div className="modal-actions"><button type="button" className="secondary-button" onClick={() => { setShowNew(false); setEditingTask(null); }}>Cancel</button><button type="submit" className="primary-button" disabled={creating || !auth.accessToken}>{creating ? "Saving…" : editingTask ? "Save changes" : "Create work item"}</button></div></form></div>}
+    {showNew && <div className="modal-backdrop" role="presentation" onMouseDown={e => {if(e.target === e.currentTarget) { setShowNew(false); setEditingTask(null); }}}><form className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" onSubmit={createWorkItem}><button type="button" className="modal-close" aria-label="Close" onClick={() => { setShowNew(false); setEditingTask(null); }}>×</button><div className="modal-icon"><Plus size={20}/></div><h2 id="modal-title">{editingTask ? 'Edit work item' : 'Create a work item'}</h2><p>{auth.accessToken ? (editingTask ? 'Update the title for this work item.' : 'Save a new work item to your authenticated workspace.') : 'Sign in and configure the API before saving work items.'}</p><label>Work item title<input value={newTitle} onChange={event => setNewTitle(event.target.value)} placeholder="e.g. Validate customer report" maxLength={240} required /></label><div className="form-grid"><label>Product<select aria-label="Product" value={newProduct} onChange={event => setNewProduct(event.target.value)}><option value="">Select product</option>{productOptions.map(value=><option key={value} value={value}>{value}</option>)}</select></label><label>Activity category<select aria-label="Activity category" value={newCategory} onChange={event => setNewCategory(event.target.value)}><option value="">Select category</option>{categoryOptions.map(value=><option key={value} value={value}>{value}</option>)}</select></label><label>Requester<input value={newRequester} onChange={event => setNewRequester(event.target.value)} placeholder="Who requested this?" maxLength={255}/></label><label>Owner<input value={newOwner} onChange={event => setNewOwner(event.target.value)} placeholder="Who owns the next action?" maxLength={255}/></label><label>Priority<select aria-label="Priority" value={newPriority} onChange={event=>setNewPriority(event.target.value as WorkItem['priority'])}>{priorities.map(value=><option key={value} value={value}>{value}</option>)}</select></label><label>Due date<input aria-label="Due date" type="date" value={newDueDate} onChange={event=>setNewDueDate(event.target.value)}/></label><label>Responsible team<select aria-label="Responsible team" value={newTeamId} onChange={event=>setNewTeamId(event.target.value)}><option value="">Unassigned</option>{liveTeams.map(team=><option key={team.id} value={team.id}>{team.name}</option>)}</select></label></div>{editingTask?.id && dataMode === 'live' && <section className="item-activity" aria-label="Work item activity"><h3>Activity history</h3>{activityError && <p role="alert" className="form-error">{activityError}</p>}{!activityError && activityItems.length === 0 && <p className="settings-footnote">No recorded activity yet.</p>}{activityItems.map((item,index)=><div className="item-activity-row" key={`${item.created_at}-${index}`}><span>{item.action.replaceAll('_',' ')}</span><small>{item.actor_subject || 'System'} · {new Date(item.created_at).toLocaleString()}</small></div>)}</section>}{createError && <p role="alert" className="form-error">{createError}</p>}<div className="modal-actions"><button type="button" className="secondary-button" onClick={() => { setShowNew(false); setEditingTask(null); }}>Cancel</button><button type="submit" className="primary-button" disabled={creating || !auth.accessToken}>{creating ? "Saving…" : editingTask ? "Save changes" : "Create work item"}</button></div></form></div>}
   </div>;
 }
