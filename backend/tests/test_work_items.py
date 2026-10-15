@@ -24,8 +24,9 @@ def make_test_client():
         hidden_item = WorkItem(workspace_id=workspace_b.id, key="WT-B1", title="Hidden item", status="Open", priority="Low")
         session.add_all([visible_item, hidden_item])
         visible_team = Team(workspace_id=workspace_a.id, name="Demo Support Team")
+        inactive_team = Team(workspace_id=workspace_a.id, name="Archived Team", is_active=False)
         foreign_team = Team(workspace_id=workspace_b.id, name="Private team")
-        session.add_all([visible_team, foreign_team])
+        session.add_all([visible_team, inactive_team, foreign_team])
         session.flush()
         foreign_team_id = foreign_team.id
         visible_item_id = visible_item.id
