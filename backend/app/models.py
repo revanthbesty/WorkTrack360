@@ -50,6 +50,7 @@ class Team(Base):
 class WorkItem(Base):
     __tablename__ = "work_items"
     __table_args__ = (
+        UniqueConstraint("workspace_id", "key", name="uq_work_item_workspace_key"),
         Index("ix_work_items_workspace_status", "workspace_id", "status"),
         Index("ix_work_items_workspace_due_at", "workspace_id", "due_at"),
     )
