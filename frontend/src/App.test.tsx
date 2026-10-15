@@ -53,4 +53,27 @@ describe('WorkTrack360 shell', () => {
     expect(screen.getByText(/demo-only settings/i)).toBeInTheDocument();
   });
 
+
+  it('allows demo-only SLA threshold changes and recalculates the policy preview', () => {
+    render(<AuthProvider><App /></AuthProvider>);
+    fireEvent.click(screen.getByRole('button', { name: /workspace settings/i }));
+    expect(screen.getByRole('combobox', { name: /sla warning window/i })).toHaveValue('24');
+    fireEvent.change(screen.getByRole('combobox', { name: /sla warning window/i }), { target: { value: '72' } });
+    fireEvent.change(screen.getByRole('combobox', { name: /critical overdue threshold/i }), { target: { value: '1' } });
+    expect(screen.getByRole('combobox', { name: /sla warning window/i })).toHaveValue('72');
+    expect(screen.getByRole('combobox', { name: /critical overdue threshold/i })).toHaveValue('1');
+    expect(screen.getByText(/do not alter server-side slas/i)).toBeInTheDocument();
+  });
+
+  it('shows a selectable reporting period with dummy-only summary metrics', () => {
+    render(<AuthProvider><App /></AuthProvider>);
+    fireEvent.click(screen.getByRole('button', { name: /analytics & reports/i }));
+    const period = screen.getByRole('combobox', { name: /reporting period/i });
+    expect(period).toHaveValue('30');
+    fireEvent.change(period, { target: { value: '7' } });
+    expect(period).toHaveValue('7');
+    expect(screen.getByText(/summary calculated from fictional sample work items only/i)).toBeInTheDocument();
+    expect(screen.getByText(/does not represent actual team performance/i)).toBeInTheDocument();
+  });
+
 });
