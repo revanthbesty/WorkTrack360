@@ -130,7 +130,7 @@ export default function App() {
     setDataError(null);
     try {
       const updated = await workItemsApi.update(auth.accessToken, task.id, { status: nextStatus });
-      setTasks(current => current.map(item => item.id === task.id ? toTaskRow(updated) : item));
+      setTasks(current => current.map(item => item.id === task.id ? toTaskRow(updated, liveTeams.find(team => team.id === updated.team_id)?.name) : item));
     } catch (error) {
       setTasks(current => current.map(item => item.id === task.id ? { ...item, status: previousStatus } : item));
       setDataError(error instanceof ApiError ? error.message : 'Could not update status. Please try again.');
