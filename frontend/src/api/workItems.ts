@@ -50,7 +50,9 @@ export class ApiError extends Error {
 }
 
 const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
-const apiBaseUrl = (configuredBaseUrl || 'http://127.0.0.1:8000').replace(/\/+$/, '');
+// Prefer same-origin routing in production. Set VITE_API_BASE_URL only when the API
+// intentionally has a separate origin and CORS has been configured for that exact origin.
+const apiBaseUrl = (configuredBaseUrl || '').replace(/\/+$/, '');
 
 async function request<T>(
   path: string,
