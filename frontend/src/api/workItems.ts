@@ -41,6 +41,10 @@ export interface CreateWorkItemInput {
 export interface UpdateWorkItemInput {
   title?: string;
   description?: string | null;
+  product?: string | null;
+  category?: string | null;
+  requester?: string | null;
+  owner?: string | null;
   team_id?: string | null;
   status?: WorkItemStatus;
   priority?: WorkItemPriority;
