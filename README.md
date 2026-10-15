@@ -64,3 +64,10 @@ The API health endpoint is `GET /health`. In local development, API docs are ava
 - Tenant scoping and identity provider integration are required before multi-user deployment.
 - The frontend API client requires a token supplied by its caller and does not save it to local storage or cookies.
 - Use least-privilege database credentials, TLS, backups, dependency scanning, and tested restore procedures for deployment.
+
+
+## Dummy-data-only showcase
+
+The frontend is intended to open in demo mode using fictional sample work items, fictional requester/owner labels, and fictional activity history. Live API reads and writes are disabled unless `VITE_ENABLE_LIVE_DATA=true` is explicitly configured. Do not enable that flag for public demos or screenshots. Never put real customer, employee, contact, ticket, tenant, or confidential company information into the showcase. See [Demo data policy](docs/DEMO_DATA_POLICY.md).
+
+The demo includes product/category filters, sample SLA overdue labels, an illustrative activity timeline, and a CSV export generated from the currently filtered fictional records. These metrics and events are for UI demonstration only and must not be treated as real operational reporting.
