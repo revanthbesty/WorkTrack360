@@ -216,7 +216,6 @@ export default function App() {
   const periodOverdue = periodTasks.filter(t => t.overdue).length;
   const periodCompleted = periodTasks.filter(t => ['Resolved', 'Closed'].includes(t.status)).length;
   const openCount = tasks.filter(t => !['Resolved', 'Closed'].includes(t.status)).length;
-  const reviewCount = tasks.filter(t => t.status === 'Needs review').length;
   const blockedCount = tasks.filter(t => t.status === 'Blocked').length;
   const customerEscalationCount = tasks.filter(t => /customer|escalation/i.test(t.category)).length;
   const highPriorityCount = tasks.filter(t => ['High', 'Urgent'].includes(t.priority)).length;
