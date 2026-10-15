@@ -15,10 +15,12 @@ const sampleTasks = [
   { id: 'WT-1046', title: 'Update compliance user guide', team: 'Documentation', status: 'Open', priority: 'Low', due: 'Tomorrow' },
   { id: 'WT-1045', title: 'Confirm engineering hand-off', team: 'Engineering', status: 'In progress', priority: 'High', due: 'Oct 19' },
 ] as const;
-type TaskRow = { id: string; title: string; team: string; status: string; priority: string; due: string };
+type TaskRow = { id: string | null; key: string; title: string; team: string; status: WorkItem['status']; priority: WorkItem['priority']; due: string };
+const statuses: WorkItem['status'][] = ['Open', 'In progress', 'Needs review', 'Blocked', 'Resolved', 'Closed'];
 function toTaskRow(item: WorkItem): TaskRow {
   return {
-    id: item.key,
+    id: item.id,
+    key: item.key,
     title: item.title,
     team: item.team_id ? `Team ${item.team_id.slice(0, 8)}` : 'Unassigned',
     status: item.status,
@@ -31,7 +33,7 @@ export default function App() {
   const [active, setActive] = useState('Overview');
   const [query, setQuery] = useState('');
   const [showNew, setShowNew] = useState(false);
-  const [tasks, setTasks] = useState<TaskRow[]>(sampleTasks.map(t => ({ ...t })));
+  const [tasks, setTasks] = useState<TaskRow[]>(sampleTasks.map(t => ({ ...t, id: null, key: t.id })));
   const [dataMode, setDataMode] = useState<'sample' | 'live'>('sample');
   const [dataError, setDataError] = useState<string | null>(null);
   const [newTitle, setNewTitle] = useState('');
@@ -41,7 +43,7 @@ export default function App() {
   useEffect(() => {
     let cancelled = false;
     if (!auth.accessToken) {
-      setTasks(sampleTasks.map(t => ({ ...t })));
+      setTasks(sampleTasks.map(t => ({ ...t, id: null, key: t.id })));
       setDataMode('sample');
       setDataError(null);
       return () => { cancelled = true; };
@@ -86,7 +88,7 @@ export default function App() {
     }
   }
 
-  const filtered = tasks.filter(t => `${t.id} ${t.title} ${t.team} ${t.status}`.toLowerCase().includes(query.toLowerCase()));
+  const filtered = tasks.filter(t => `${t.key} ${t.title} ${t.team} ${t.status}`.toLowerCase().includes(query.toLowerCase()));
   return <div className="app-shell">
     <aside className="sidebar">
       <a className="brand" href="#home" aria-label="WorkTrack360 home"><span className="brand-mark"><Workflow size={23}/></span><span><strong>WorkTrack<span>360</span></strong><small>WORKSPACE OPERATIONS</small></span></a>
@@ -105,7 +107,7 @@ export default function App() {
           <article className="metric-card"><div className="metric-top"><span>Customer escalations</span><span className="metric-icon rose"><Workflow size={18}/></span></div><div className="metric-value">04</div><div className="metric-foot"><span className="warning-text">2 awaiting response</span><span>needs attention</span></div><div className="avatar-stack"><span>PS</span><span>PO</span><span>EN</span><small>+1 team</small></div></article>
           <article className="metric-card"><div className="metric-top"><span>On-time completion</span><span className="metric-icon green"><CheckCircle2 size={18}/></span></div><div className="metric-value">94<span className="percent">%</span></div><div className="metric-foot"><span className="positive"><ArrowUpRight size={14}/> 3.4%</span><span>this month</span></div><div className="sparkline"><svg viewBox="0 0 200 42" role="img" aria-label="Illustrative completion trend"><path d="M0 34 C18 28 21 32 36 22 S60 28 76 18 S99 25 116 13 S142 21 158 8 S183 15 200 3" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/></svg></div></article></div>
         <section className="work-card"><div className="card-heading"><div><h2>Priority work</h2><p>Keep the next actions visible and accountable.</p></div><button className="text-button" onClick={() => setActive('Work items')}>View all work <ArrowUpRight size={15}/></button></div><div className="table-toolbar"><div className="table-tabs"><button className="tab-active">All work <span>28</span></button><button onClick={() => setQuery('In progress')}>In progress</button><button onClick={() => setQuery('Needs review')}>Needs review</button></div><label className="search-box"><Search size={16}/><input aria-label="Search work" value={query} onChange={e => setQuery(e.target.value)} placeholder="Search work items..."/><kbd><Command size={11}/> K</kbd></label></div>
-          <div className="table-wrap"><table><thead><tr><th>WORK ITEM</th><th>RESPONSIBLE TEAM</th><th>STATUS</th><th>PRIORITY</th><th>DUE DATE</th><th/></tr></thead><tbody>{filtered.map(t=><tr key={t.id}><td><div className="task-title"><span className="task-check"><CheckCircle2 size={15}/></span><span><b>{t.title}</b><small>{t.id}</small></span></div></td><td><span className="team-pill"><span className="team-dot"/>{t.team}</span></td><td><span className={`status-pill ${t.status.toLowerCase().replaceAll(' ','-')}`}><i/>{t.status}</span></td><td><span className={`priority ${t.priority.toLowerCase()}`}><i/>{t.priority}</span></td><td className="due-date">{t.due}</td><td><button className="row-menu" aria-label={`Open ${t.id} actions`}>···</button></td></tr>)}</tbody></table>{filtered.length === 0 && <div className="empty-state">No matching work items. Try a different search.</div>}</div>
+          <div className="table-wrap"><table><thead><tr><th>WORK ITEM</th><th>RESPONSIBLE TEAM</th><th>STATUS</th><th>PRIORITY</th><th>DUE DATE</th><th/></tr></thead><tbody>{filtered.map(t=><tr key={t.id}><td><div className="task-title"><span className="task-check"><CheckCircle2 size={15}/></span><span><b>{t.title}</b><small>{t.key}</small></span></div></td><td><span className="team-pill"><span className="team-dot"/>{t.team}</span></td><td>{dataMode === 'live' && auth.accessToken && t.id ? <select className={`status-select ${t.status.toLowerCase().replaceAll(' ','-')}`} aria-label={`Status for ${t.key}`} value={t.status} onChange={event => void changeStatus(t, event.target.value as WorkItem['status'])}>{statuses.map(status => <option key={status} value={status}>{status}</option>)}</select> : <span className={`status-pill ${t.status.toLowerCase().replaceAll(' ','-')}`}><i/>{t.status}</span>}</td><td><span className={`priority ${t.priority.toLowerCase()}`}><i/>{t.priority}</span></td><td className="due-date">{t.due}</td><td><button className="row-menu" aria-label={`Open ${t.key} actions`} disabled title={dataMode === 'live' ? 'More actions coming soon' : 'Sign in and connect live data to edit items'}>···</button></td></tr>)}</tbody></table>{filtered.length === 0 && <div className="empty-state">No matching work items. Try a different search.</div>}</div>
           <div className="table-footer"><span>Showing <b>{filtered.length}</b> {dataMode === "live" ? "live work items" : "sample work items"}</span><button onClick={() => setQuery('')}>Clear filters</button></div></section>
         <footer className="page-footer"><span>WorkTrack360 <span className="footer-dot">·</span> Plan. Track. Collaborate. Deliver.</span><span><i/> {dataMode === "live" ? "Work items loaded from API" : "Illustrative sample data"}</span></footer>
       </section>
