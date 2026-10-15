@@ -46,7 +46,7 @@ describe('WorkTrack360 shell', () => {
     fireEvent.click(screen.getByRole('button', { name: /workspace settings/i }));
     expect(screen.getByRole('heading', { name: /workspace dropdowns/i })).toBeInTheDocument();
     fireEvent.change(screen.getByRole('textbox', { name: /new products/i }), { target: { value: 'Demo Product X' } });
-    fireEvent.click(screen.getByRole('button', { name: /^add$/i }).at(0)!);
+    fireEvent.click(screen.getAllByRole('button', { name: /^add$/i })[0]);
     expect(screen.getByText('Demo Product X')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /remove demo product x/i }));
     expect(screen.queryByText('Demo Product X')).not.toBeInTheDocument();
