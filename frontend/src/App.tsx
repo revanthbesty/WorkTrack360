@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useAuth } from './auth/AuthProvider';
 import { ApiError, workItemsApi, type WorkItem } from './api/workItems';
 import { Activity, ArrowUpRight, Bell, CalendarClock, CheckCircle2, ChevronDown, CircleHelp, Command, Gauge, LayoutDashboard, ListTodo, Plus, Search, Settings2, ShieldCheck, Users, Workflow } from 'lucide-react';
