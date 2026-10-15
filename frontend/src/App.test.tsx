@@ -24,7 +24,7 @@ describe('WorkTrack360 shell', () => {
     render(<AuthProvider><App /></AuthProvider>);
     fireEvent.click(screen.getAllByRole('button', { name: 'Needs review' }).at(-1)!);
     expect(screen.getAllByText('Prepare customer demo walkthrough').length).toBeGreaterThan(0);
-    expect(screen.queryByText('Review quarterly validation issue')).not.toBeInTheDocument();
+    expect(screen.queryAllByText('Review quarterly validation issue')).toHaveLength(0);
     fireEvent.click(screen.getByRole('button', { name: /clear filters/i }));
     expect(screen.getAllByText('Review quarterly validation issue').length).toBeGreaterThan(0);
   });
