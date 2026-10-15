@@ -11,6 +11,8 @@
 - `GET /api/v1/me`: protected identity context, requires a verified bearer token and configured OIDC issuer/audience/JWKS URL.
 - `GET /api/v1/work-items`: authenticated, workspace-scoped list with bounded pagination.
 - `POST /api/v1/work-items`: authenticated work-item creation; verifies a selected team belongs to the caller's workspace and writes a minimal audit event.
+- `GET /api/v1/work-items/{item_id}`: returns an item only when it belongs to the authenticated workspace; cross-workspace IDs return 404.
+- `PATCH /api/v1/work-items/{item_id}`: validates partial updates, checks workspace ownership and team scope, and records an audit event.
 
 ## Identity contract
 The API verifies RS256 access tokens using the configured JWKS endpoint. Required claims include `iss`, `aud`, `exp`, `iat`, `sub`, and a UUID `workspace_id`. An optional `roles` array is parsed from the signed token. These claim names and semantics must be explicitly configured with the chosen identity provider. The API intentionally fails closed when the provider configuration is absent.
