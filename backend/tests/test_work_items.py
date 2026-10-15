@@ -92,3 +92,10 @@ def test_work_item_creation_requires_recognized_workspace_role() -> None:
     app.dependency_overrides[current_principal] = lambda: Principal(subject="no-role-user", workspace_id=workspace_id, roles=frozenset())
     response = client.post("/api/v1/work-items", json={"title": "Should be denied"})
     assert response.status_code == 403
+
+
+def test_reads_require_a_recognized_workspace_role() -> None:
+    client, _, workspace_id, _, _ = make_test_client()
+    app.dependency_overrides[current_principal] = lambda: Principal(subject="no-role-user", workspace_id=workspace_id, roles=frozenset())
+    response = client.get("/api/v1/work-items")
+    assert response.status_code == 403
