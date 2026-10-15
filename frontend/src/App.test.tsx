@@ -24,7 +24,7 @@ describe('WorkTrack360 shell', () => {
 
   it('filters the work table by status without replacing the search query', () => {
     render(<AuthProvider><App /></AuthProvider>);
-    fireEvent.click(screen.getAllByRole('button', { name: 'Needs review' }).at(-1)!);
+    fireEvent.click(screen.getAllByRole('button', { name: 'Needs review' })[screen.getAllByRole('button', { name: 'Needs review' }).length - 1]);
     expect(screen.getAllByText('Prepare customer demo walkthrough').length).toBeGreaterThan(0);
     expect(screen.queryAllByText('Review quarterly validation issue')).toHaveLength(0);
     fireEvent.click(screen.getByRole('button', { name: /clear filters/i }));
