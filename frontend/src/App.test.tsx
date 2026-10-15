@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { AuthProvider } from './auth/AuthProvider';
 import App from './App';
 
@@ -9,5 +9,13 @@ describe('WorkTrack360 shell', () => {
     expect(screen.getByRole('link', { name: /worktrack360 home/i })).toBeInTheDocument();
     expect(screen.getByRole('navigation', { name: /primary/i })).toBeInTheDocument();
     expect(screen.getByText(/foundation preview/i)).toBeInTheDocument();
+  });
+
+  it('keeps persistent creation disabled until a trusted session exists', () => {
+    render(<AuthProvider><App /></AuthProvider>);
+    fireEvent.click(screen.getByRole('button', { name: /create work item/i }));
+    expect(screen.getByRole('dialog', { name: /create a work item/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /create work item/i })).toBeDisabled();
+    expect(screen.getByText(/sign in and configure the api/i)).toBeInTheDocument();
   });
 });
