@@ -1,9 +1,21 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { AuthProvider } from './auth/AuthProvider';
-import App from './App';
+import App, { escapeCsvCell } from './App';
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
+
+describe('CSV export safety', () => {
+  it.each([
+    ['=1+1', '"\'=1+1"'],
+    ['  +SUM(A1:A2)', '"\'  +SUM(A1:A2)"'],
+    ['-1+2', '"\'-1+2"'],
+    ['@SUM(A1)', '"\'@SUM(A1)"'],
+    ['normal "quoted" text', '"normal ""quoted"" text"'],
+  ])('safely escapes %s', (input, expected) => {
+    expect(escapeCsvCell(input)).toBe(expected);
+  });
+});
 
 describe('WorkTrack360 shell', () => {
   it('renders the accessible product brand and primary navigation', () => {
