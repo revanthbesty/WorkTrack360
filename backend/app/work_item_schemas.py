@@ -8,6 +8,10 @@ PRIORITIES = {"Low", "Medium", "High", "Urgent"}
 class WorkItemCreate(BaseModel):
     title: str = Field(min_length=1, max_length=240)
     description: str | None = Field(default=None, max_length=10000)
+    product: str | None = Field(default=None, max_length=120)
+    category: str | None = Field(default=None, max_length=120)
+    requester: str | None = Field(default=None, max_length=255)
+    owner: str | None = Field(default=None, max_length=255)
     team_id: UUID | None = None
     status: str = "Open"
     priority: str = "Medium"
@@ -41,6 +45,10 @@ class WorkItemRead(BaseModel):
     key: str
     title: str
     description: str | None
+    product: str | None
+    category: str | None
+    requester: str | None
+    owner: str | None
     status: str
     priority: str
     team_id: UUID | None
