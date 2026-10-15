@@ -34,4 +34,6 @@ jobs:
           cache: pip
           cache-dependency-path: backend/requirements.txt
       - run: pip install -r requirements.txt
+      - name: Validate database migrations
+        run: DATABASE_URL=sqlite+pysqlite:///./migration-check.db alembic upgrade head
       - run: pytest
