@@ -27,9 +27,65 @@ function toTaskRow(item: WorkItem): TaskRow {
   };
 }
 export default function App() {
+  const auth = useAuth();
   const [active, setActive] = useState('Overview');
   const [query, setQuery] = useState('');
   const [showNew, setShowNew] = useState(false);
+  const [tasks, setTasks] = useState<TaskRow[]>(sampleTasks.map(t => ({ ...t })));
+  const [dataMode, setDataMode] = useState<'sample' | 'live'>('sample');
+  const [dataError, setDataError] = useState<string | null>(null);
+  const [newTitle, setNewTitle] = useState('');
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!auth.accessToken) {
+      setTasks(sampleTasks.map(t => ({ ...t })));
+      setDataMode('sample');
+      setDataError(null);
+      return () => { cancelled = true; };
+    }
+    void workItemsApi.list(auth.accessToken, 50, 0).then(items => {
+      if (cancelled) return;
+      setTasks(items.map(toTaskRow));
+      setDataMode('live');
+      setDataError(null);
+    }).catch(error => {
+      if (cancelled) return;
+      setDataMode('sample');
+      setDataError(error instanceof ApiError ? error.message : 'Could not load live work items. Check the API connection.');
+      setTasks(sampleTasks.map(t => ({ ...t })));
+    });
+    return () => { cancelled = true; };
+  }, [auth.accessToken]);
+
+  async function createWorkItem(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!auth.accessToken) {
+      setCreateError('Sign in and configure the API before saving work items.');
+      return;
+    }
+    const title = newTitle.trim();
+    if (!title) {
+      setCreateError('Enter a title for this work item.');
+      return;
+    }
+    setCreating(true);
+    setCreateError(null);
+    try {
+      const created = await workItemsApi.create(auth.accessToken, { title });
+      setTasks(current => [toTaskRow(created), ...current]);
+      setDataMode('live');
+      setNewTitle('');
+      setShowNew(false);
+    } catch (error) {
+      setCreateError(error instanceof ApiError ? error.message : 'Could not save this work item. Check the API connection.');
+    } finally {
+      setCreating(false);
+    }
+  }
+
   const filtered = tasks.filter(t => `${t.id} ${t.title} ${t.team} ${t.status}`.toLowerCase().includes(query.toLowerCase()));
   return <div className="app-shell">
     <aside className="sidebar">
