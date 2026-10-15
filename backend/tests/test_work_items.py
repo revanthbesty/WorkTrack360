@@ -23,8 +23,9 @@ def make_test_client():
         visible_item = WorkItem(workspace_id=workspace_a.id, key="WT-A1", title="Visible item", status="Open", priority="High")
         hidden_item = WorkItem(workspace_id=workspace_b.id, key="WT-B1", title="Hidden item", status="Open", priority="Low")
         session.add_all([visible_item, hidden_item])
+        visible_team = Team(workspace_id=workspace_a.id, name="Demo Support Team")
         foreign_team = Team(workspace_id=workspace_b.id, name="Private team")
-        session.add(foreign_team)
+        session.add_all([visible_team, foreign_team])
         session.flush()
         foreign_team_id = foreign_team.id
         visible_item_id = visible_item.id
@@ -161,3 +162,11 @@ def test_work_item_list_rejects_limit_above_maximum() -> None:
     response = client.get("/api/v1/work-items?limit=101")
     assert response.status_code == 422
 
+
+
+def test_team_directory_only_returns_active_teams_from_current_workspace() -> None:
+    client, _, _, _, _ = make_test_client()
+    response = client.get("/api/v1/teams")
+    assert response.status_code == 200
+    assert [team["name"] for team in response.json()] == ["Demo Support Team"]
+    assert all("id" in team for team in response.json())
