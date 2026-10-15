@@ -90,6 +90,39 @@ def create_work_item(
     return item
 
 
+@router.get("/activity/recent")
+def list_recent_work_item_activity(
+    limit: int = Query(default=10, ge=1, le=50),
+    principal: Principal = Depends(require_roles("workspace_admin", "manager", "member", "viewer")),
+    session: Session = Depends(get_session),
+) -> list[dict[str, str | None]]:
+    """Return recent activity for work items visible to the current workspace."""
+    rows = session.execute(
+        select(AuditEvent, WorkItem.key)
+        .join(
+            WorkItem,
+            (WorkItem.key == AuditEvent.entity_id)
+            & (WorkItem.workspace_id == AuditEvent.workspace_id),
+        )
+        .where(
+            AuditEvent.workspace_id == principal.workspace_id,
+            WorkItem.workspace_id == principal.workspace_id,
+            AuditEvent.entity_type == "work_item",
+        )
+        .order_by(AuditEvent.created_at.desc())
+        .limit(limit)
+    ).all()
+    return [
+        {
+            "key": key,
+            "action": event.action,
+            "actor_subject": event.actor_subject,
+            "created_at": event.created_at.isoformat(),
+        }
+        for event, key in rows
+    ]
+
+
 @router.get("/{item_id}", response_model=WorkItemRead)
 def get_work_item(
     item_id: UUID,
