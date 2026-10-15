@@ -187,7 +187,7 @@ export default function App() {
     const escapeCell = (value: string) => {
       // Prevent spreadsheet formula injection when CSVs are opened in Excel or similar tools.
       const text = String(value ?? '');
-      const safe = /^[\\u0000-\\u0020]*[=+\\-@]/.test(text) ? `'${text}` : text;
+      const safe = /^\\s*[=+\\-@]/.test(text) ? `'${text}` : text;
       return `"${safe.replaceAll('"', '""')}"`;
     };
     const csv = [columns, ...rows].map(row => row.map(value => escapeCell(String(value ?? ''))).join(',')).join('\r\n');
