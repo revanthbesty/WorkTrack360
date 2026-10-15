@@ -107,10 +107,10 @@ export default function App() {
     try {
       if (editingTask?.id) {
         const updated = await workItemsApi.update(auth.accessToken, editingTask.id, { title, product: newProduct.trim() || null, category: newCategory.trim() || null, requester: newRequester.trim() || null, owner: newOwner.trim() || null, priority: newPriority, due_at: newDueDate ? new Date(`${newDueDate}T23:59:00`).toISOString() : null, team_id: newTeamId || null });
-        setTasks(current => current.map(item => item.id === editingTask.id ? toTaskRow(updated) : item));
+        setTasks(current => current.map(item => item.id === editingTask.id ? toTaskRow(updated, liveTeams.find(team => team.id === updated.team_id)?.name) : item));
       } else {
-        const created = await workItemsApi.create(auth.accessToken, { title, product: newProduct.trim() || null, category: newCategory.trim() || null, requester: newRequester.trim() || null, owner: newOwner.trim() || null, priority: newPriority, due_at: newDueDate ? new Date(`${newDueDate}T23:59:00`).toISOString() : null });
-        setTasks(current => [toTaskRow(created), ...current]);
+        const created = await workItemsApi.create(auth.accessToken, { title, product: newProduct.trim() || null, category: newCategory.trim() || null, requester: newRequester.trim() || null, owner: newOwner.trim() || null, priority: newPriority, due_at: newDueDate ? new Date(`${newDueDate}T23:59:00`).toISOString() : null, team_id: newTeamId || null });
+        setTasks(current => [toTaskRow(created, liveTeams.find(team => team.id === created.team_id)?.name), ...current]);
       }
       setDataMode('live');
       setNewTitle(''); setNewProduct(''); setNewCategory(''); setNewRequester(''); setNewOwner(''); setNewDueDate(''); setNewPriority('Medium'); setNewTeamId('');
