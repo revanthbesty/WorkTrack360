@@ -8,7 +8,7 @@ describe('WorkTrack360 shell', () => {
     render(<AuthProvider><App /></AuthProvider>);
     expect(screen.getByRole('link', { name: /worktrack360 home/i })).toBeInTheDocument();
     expect(screen.getByRole('navigation', { name: /primary/i })).toBeInTheDocument();
-    expect(screen.getByText(/foundation preview/i)).toBeInTheDocument();
+    expect(screen.getByText(/demo mode — dummy data only/i)).toBeInTheDocument();
   });
 
   it('keeps persistent creation disabled until a trusted session exists', () => {
@@ -26,7 +26,17 @@ describe('WorkTrack360 shell', () => {
     expect(screen.getAllByText('Prepare customer demo walkthrough').length).toBeGreaterThan(0);
     expect(screen.queryByText('Review quarterly validation issue')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /clear filters/i }));
-    expect(screen.getByText('Review quarterly validation issue')).toBeInTheDocument();
+    expect(screen.getAllByText('Review quarterly validation issue').length).toBeGreaterThan(0);
+  });
+
+  it('filters by product and shows overdue labels using fictional records', () => {
+    render(<AuthProvider><App /></AuthProvider>);
+    fireEvent.change(screen.getByRole('combobox', { name: 'Filter by product' }), { target: { value: 'Oxbow' } });
+    expect(screen.getAllByText('Prepare customer demo walkthrough').length).toBeGreaterThan(0);
+    expect(screen.queryByText('Review quarterly validation issue')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /clear filters/i }));
+    expect(screen.getAllByText('Review quarterly validation issue').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('SLA overdue').length).toBeGreaterThan(0);
   });
 
 });
