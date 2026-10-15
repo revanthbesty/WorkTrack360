@@ -22,6 +22,7 @@ describe('WorkTrack360 shell', () => {
     expect(within(dialog).getByText(/sign in and configure the api/i)).toBeInTheDocument();
     expect(within(dialog).getByRole('combobox', { name: 'Priority' })).toHaveValue('Medium');
     expect(within(dialog).getByLabelText('Due date')).toHaveAttribute('type', 'date');
+    expect(within(dialog).getByRole('combobox', { name: 'Responsible team' })).toHaveValue('');
   });
 
   it('filters the work table by status without replacing the search query', () => {
