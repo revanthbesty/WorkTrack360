@@ -57,7 +57,7 @@ export default function App() {
       if (cancelled) return;
       setDataMode('sample');
       setDataError(error instanceof ApiError ? error.message : 'Could not load live work items. Check the API connection.');
-      setTasks(sampleTasks.map(t => ({ ...t })));
+      setTasks(sampleTasks.map(t => ({ ...t, id: null, key: t.id })));
     });
     return () => { cancelled = true; };
   }, [auth.accessToken]);
