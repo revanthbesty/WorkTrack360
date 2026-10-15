@@ -19,4 +19,14 @@ describe('WorkTrack360 shell', () => {
     expect(within(dialog).getByRole('button', { name: /create work item/i })).toBeDisabled();
     expect(within(dialog).getByText(/sign in and configure the api/i)).toBeInTheDocument();
   });
+
+  it('filters the work table by status without replacing the search query', () => {
+    render(<AuthProvider><App /></AuthProvider>);
+    fireEvent.click(screen.getByRole('button', { name: 'Needs review' }));
+    expect(screen.getByText('Prepare customer demo walkthrough')).toBeInTheDocument();
+    expect(screen.queryByText('Review quarterly validation issue')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /clear filters/i }));
+    expect(screen.getByText('Review quarterly validation issue')).toBeInTheDocument();
+  });
+
 });
