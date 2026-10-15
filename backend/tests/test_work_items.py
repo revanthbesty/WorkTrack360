@@ -75,6 +75,34 @@ def test_update_work_item_records_change_for_current_workspace() -> None:
     assert response.json()["priority"] == "Urgent"
 
 
+def test_create_and_update_support_metadata() -> None:
+    client, _, _, visible_item_id, _ = make_test_client()
+    created = client.post("/api/v1/work-items", json={
+        "title": "Product support ticket",
+        "product": "Glacier CRD IV",
+        "category": "Customer ticket",
+        "requester": "Client contact",
+        "owner": "Product Support",
+    })
+    assert created.status_code == 201
+    assert created.json()["product"] == "Glacier CRD IV"
+    assert created.json()["category"] == "Customer ticket"
+    assert created.json()["requester"] == "Client contact"
+    assert created.json()["owner"] == "Product Support"
+
+    updated = client.patch(f"/api/v1/work-items/{visible_item_id}", json={
+        "product": "Oxbow",
+        "category": "Software/Internal Team",
+        "requester": "Business Development",
+        "owner": "Engineering",
+    })
+    assert updated.status_code == 200
+    assert updated.json()["product"] == "Oxbow"
+    assert updated.json()["category"] == "Software/Internal Team"
+    assert updated.json()["requester"] == "Business Development"
+    assert updated.json()["owner"] == "Engineering"
+
+
 def test_cross_workspace_item_cannot_be_updated() -> None:
     client, _, _, _, hidden_item_id = make_test_client()
     response = client.patch(f"/api/v1/work-items/{hidden_item_id}", json={"title": "Attempted change"})
