@@ -50,6 +50,7 @@ def upgrade() -> None:
         sa.Column("created_by_subject", sa.String(255), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
+        sa.UniqueConstraint("workspace_id", "key", name="uq_work_item_workspace_key"),
     )
     op.create_index("ix_work_items_workspace_id", "work_items", ["workspace_id"])
     op.create_index("ix_work_items_team_id", "work_items", ["team_id"])
