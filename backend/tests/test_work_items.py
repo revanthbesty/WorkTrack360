@@ -189,3 +189,38 @@ def test_work_item_activity_is_scoped_to_workspace_item() -> None:
     assert response.json()[0]["action"] == "work_item.updated"
     assert response.json()[0]["actor_subject"] == "demo-member"
     assert "created_at" in response.json()[0]
+
+
+
+def test_recent_activity_only_returns_current_workspace_events() -> None:
+    client, _, workspace_id, _, _ = make_test_client()
+    with next(app.dependency_overrides[get_session]()) as session:
+        session.add_all([
+            AuditEvent(
+                workspace_id=workspace_id,
+                actor_subject="current-member",
+                action="work_item.updated",
+                entity_type="work_item",
+                entity_id="WT-A1",
+            ),
+            AuditEvent(
+                workspace_id=uuid4(),
+                actor_subject="other-member",
+                action="work_item.updated",
+                entity_type="work_item",
+                entity_id="WT-B1",
+            ),
+        ])
+        session.commit()
+
+    response = client.get("/api/v1/work-items/activity/recent")
+    assert response.status_code == 200
+    assert len(response.json()) == 1
+    assert response.json()[0]["key"] == "WT-A1"
+    assert response.json()[0]["actor_subject"] == "current-member"
+
+
+def test_recent_activity_limit_is_bounded() -> None:
+    client, _, _, _, _ = make_test_client()
+    response = client.get("/api/v1/work-items/activity/recent?limit=51")
+    assert response.status_code == 422
