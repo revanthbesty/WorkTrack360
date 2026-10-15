@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.auth import Principal, current_principal
 from app.work_items import router as work_items_router
+from app.teams import router as teams_router
 
 
 class Settings(BaseSettings):
@@ -53,3 +54,4 @@ def get_me(principal: Principal = Depends(current_principal)) -> dict[str, objec
     }
 
 app.include_router(work_items_router, prefix=settings.api_prefix)
+app.include_router(teams_router, prefix=settings.api_prefix)
