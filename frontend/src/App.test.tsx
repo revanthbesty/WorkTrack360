@@ -79,4 +79,22 @@ describe('WorkTrack360 shell', () => {
     expect(screen.getByText(/does not represent actual team performance/i)).toBeInTheDocument();
   });
 
+
+  it('exports fictional rows with an explicitly demo-labelled filename', () => {
+    vi.stubGlobal('URL', {
+      createObjectURL: vi.fn(() => 'blob:worktrack360-test'),
+      revokeObjectURL: vi.fn(),
+    });
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) {
+      expect(this.download).toBe('worktrack360-demo-work-items.csv');
+    });
+
+    render(<AuthProvider><App /></AuthProvider>);
+    fireEvent.click(screen.getByRole('button', { name: /export demo csv/i }));
+
+    expect(click).toHaveBeenCalledOnce();
+    expect(URL.createObjectURL).toHaveBeenCalledOnce();
+    expect(URL.revokeObjectURL).toHaveBeenCalledOnce();
+  });
+
 });
