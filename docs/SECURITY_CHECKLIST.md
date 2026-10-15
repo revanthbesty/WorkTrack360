@@ -15,7 +15,7 @@ This checklist records implementation status; it is not a certification or produ
 
 ## Required before multi-user or production use
 - [ ] Configure and test a trusted identity provider; validate the exact issuer, audience, JWKS rotation, and workspace/role claim contract.
-- [ ] Apply operation-level role-based authorization; define workspace membership lifecycle and role grants. Current write routes authenticate callers but do not yet enforce role-specific permissions.
+- [ ] Define and test the final workspace role contract and membership lifecycle. Current create/update routes require one of `workspace_admin`, `manager`, or `member`; finer-grained permissions (for example, who may close or reassign items) remain to be defined.
 - [ ] Add PostgreSQL row-level security or equivalent defense-in-depth tenant controls.
 - [ ] Run all tests and CI successfully; add negative tests for invalid, expired, wrong-audience and wrong-issuer tokens. Tests have been added but have not yet been confirmed passing.
 - [ ] Add schema migrations to CI and verify migration parity against SQLAlchemy models.
