@@ -106,7 +106,7 @@ describe('WorkTrack360 shell', () => {
     const customerCard = screen.getByText('Customer-related items').closest('article');
     expect(customerCard?.querySelector('.metric-value')).toHaveTextContent('1');
 
-    const completionCard = screen.getByText('Completed').closest('article');
+    const completionCard = screen.getByText('On-time completion').closest('article');
     expect(completionCard?.querySelector('.metric-value')).toHaveTextContent('0%');
   });
 
