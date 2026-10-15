@@ -105,7 +105,7 @@ export default function App() {
         const updated = await workItemsApi.update(auth.accessToken, editingTask.id, { title, product: newProduct.trim() || null, category: newCategory.trim() || null, requester: newRequester.trim() || null, owner: newOwner.trim() || null, priority: newPriority, due_at: newDueDate ? new Date(`${newDueDate}T23:59:00`).toISOString() : null });
         setTasks(current => current.map(item => item.id === editingTask.id ? toTaskRow(updated) : item));
       } else {
-        const created = await workItemsApi.create(auth.accessToken, { title, product: newProduct.trim() || null, category: newCategory.trim() || null, requester: newRequester.trim() || null, owner: newOwner.trim() || null });
+        const created = await workItemsApi.create(auth.accessToken, { title, product: newProduct.trim() || null, category: newCategory.trim() || null, requester: newRequester.trim() || null, owner: newOwner.trim() || null, priority: newPriority, due_at: newDueDate ? new Date(`${newDueDate}T23:59:00`).toISOString() : null });
         setTasks(current => [toTaskRow(created), ...current]);
       }
       setDataMode('live');
