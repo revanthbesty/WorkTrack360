@@ -7,6 +7,10 @@ from app.work_item_schemas import PRIORITIES, STATUSES
 class WorkItemUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=240)
     description: str | None = Field(default=None, max_length=10000)
+    product: str | None = Field(default=None, max_length=120)
+    category: str | None = Field(default=None, max_length=120)
+    requester: str | None = Field(default=None, max_length=255)
+    owner: str | None = Field(default=None, max_length=255)
     team_id: UUID | None = None
     status: str | None = None
     priority: str | None = None
