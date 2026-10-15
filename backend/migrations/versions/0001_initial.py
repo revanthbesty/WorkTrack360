@@ -5,7 +5,6 @@ Revises:
 """
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
 
 revision = "0001_initial"
 down_revision = None
@@ -23,7 +22,6 @@ def upgrade() -> None:
         sa.Column("slug", sa.String(80), nullable=False),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.true()),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
-        sa.UniqueConstraint("slug", name="uq_workspaces_slug"),
     )
     op.create_index("ix_workspaces_slug", "workspaces", ["slug"], unique=True)
 
