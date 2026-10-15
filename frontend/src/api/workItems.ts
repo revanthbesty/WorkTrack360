@@ -13,6 +13,10 @@ export interface WorkItem {
   key: string;
   title: string;
   description: string | null;
+  product: string | null;
+  category: string | null;
+  requester: string | null;
+  owner: string | null;
   status: WorkItemStatus;
   priority: WorkItemPriority;
   team_id: string | null;
@@ -24,6 +28,10 @@ export interface WorkItem {
 export interface CreateWorkItemInput {
   title: string;
   description?: string | null;
+  product?: string | null;
+  category?: string | null;
+  requester?: string | null;
+  owner?: string | null;
   team_id?: string | null;
   status?: WorkItemStatus;
   priority?: WorkItemPriority;
