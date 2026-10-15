@@ -9,3 +9,8 @@ def test_health_endpoint_returns_minimal_status() -> None:
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
     assert "secret" not in response.text.lower()
+
+
+def test_identity_endpoint_requires_authentication() -> None:
+    response = client.get("/api/v1/me")
+    assert response.status_code == 401
