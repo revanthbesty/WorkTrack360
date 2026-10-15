@@ -156,7 +156,7 @@ export default function App() {
   const criticalOverdueCount = tasks.filter(t => t.overdue && t.dueAt && (Date.now() - new Date(t.dueAt).getTime()) >= Number(criticalOverdueDays) * 86400000).length;
   const dueSoonCount = tasks.filter(t => t.dueAt && !t.overdue && !['Resolved', 'Closed'].includes(t.status) && (new Date(t.dueAt).getTime() - Date.now()) <= Number(slaWarningHours) * 3600000).length;
   const reportWindowMs = Number(reportPeriod) * 86400000;
-  const periodTasks = tasks.filter(t => t.dueAt && (Date.now() - new Date(t.dueAt).getTime()) <= reportWindowMs);
+  const periodTasks = tasks.filter(t => t.dueAt && (Date.now() - new Date(t.dueAt).getTime()) >= 0 && (Date.now() - new Date(t.dueAt).getTime()) <= reportWindowMs);
   const periodOverdue = periodTasks.filter(t => t.overdue).length;
   const periodCompleted = periodTasks.filter(t => ['Resolved', 'Closed'].includes(t.status)).length;
   const openCount = tasks.filter(t => !['Resolved', 'Closed'].includes(t.status)).length;
