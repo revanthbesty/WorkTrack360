@@ -1,7 +1,9 @@
-import { describe, expect, it } from 'vitest';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { AuthProvider } from './auth/AuthProvider';
 import App from './App';
+
+afterEach(() => cleanup());
 
 describe('WorkTrack360 shell', () => {
   it('renders the accessible product brand and primary navigation', () => {
