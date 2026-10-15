@@ -14,3 +14,9 @@ def test_health_endpoint_returns_minimal_status() -> None:
 def test_identity_endpoint_requires_authentication() -> None:
     response = client.get("/api/v1/me")
     assert response.status_code == 401
+
+
+def test_identity_endpoint_fails_closed_without_identity_provider_config() -> None:
+    response = client.get("/api/v1/me", headers={"Authorization": "Bearer placeholder-token"})
+    assert response.status_code == 503
+    assert "placeholder-token" not in response.text
