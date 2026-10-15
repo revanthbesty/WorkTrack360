@@ -97,4 +97,17 @@ describe('WorkTrack360 shell', () => {
     expect(URL.revokeObjectURL).toHaveBeenCalledOnce();
   });
 
+
+  it('derives dashboard counts from the loaded fictional work items', () => {
+    render(<AuthProvider><App /></AuthProvider>);
+    const openCard = screen.getByText('Open work items').closest('article');
+    expect(openCard?.querySelector('.metric-value')).toHaveTextContent('4');
+
+    const customerCard = screen.getByText('Customer-related items').closest('article');
+    expect(customerCard?.querySelector('.metric-value')).toHaveTextContent('1');
+
+    const completionCard = screen.getByText('Completed').closest('article');
+    expect(completionCard?.querySelector('.metric-value')).toHaveTextContent('0%');
+  });
+
 });
