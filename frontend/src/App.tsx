@@ -184,7 +184,12 @@ export default function App() {
   function exportWorkItemsCsv() {
     const columns = ['Key', 'Title', 'Product', 'Category', 'Requester', 'Owner', 'Team', 'Status', 'Priority', 'Due date', 'SLA overdue'];
     const rows = filtered.map(item => [item.key, item.title, item.product, item.category, item.requester, item.owner, item.team, item.status, item.priority, item.due, item.overdue ? 'Yes' : 'No']);
-    const escapeCell = (value: string) => `"${value.replaceAll('"', '""')}"`;
+    const escapeCell = (value: string) => {
+      // Prevent spreadsheet formula injection when CSVs are opened in Excel or similar tools.
+      const text = String(value ?? '');
+      const safe = /^[\\u0000-\\u0020]*[=+\\-@]/.test(text) ? `'${text}` : text;
+      return `"${safe.replaceAll('"', '""')}"`;
+    };
     const csv = [columns, ...rows].map(row => row.map(value => escapeCell(String(value ?? ''))).join(',')).join('\r\n');
     const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
