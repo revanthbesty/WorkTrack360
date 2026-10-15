@@ -85,3 +85,10 @@ def test_invalid_work_item_id_is_rejected() -> None:
     client, _, _, _, _ = make_test_client()
     response = client.get("/api/v1/work-items/not-a-uuid")
     assert response.status_code == 422
+
+
+def test_work_item_creation_requires_recognized_workspace_role() -> None:
+    client, _, workspace_id, _, _ = make_test_client()
+    app.dependency_overrides[current_principal] = lambda: Principal(subject="no-role-user", workspace_id=workspace_id, roles=frozenset())
+    response = client.post("/api/v1/work-items", json={"title": "Should be denied"})
+    assert response.status_code == 403
