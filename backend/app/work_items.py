@@ -97,7 +97,7 @@ def get_work_item(
 
 @router.patch("/{item_id}", response_model=WorkItemRead)
 def update_work_item(
-    item_id,
+    item_id: UUID,
     payload: WorkItemUpdate,
     principal: Principal = Depends(current_principal),
     session: Session = Depends(get_session),
