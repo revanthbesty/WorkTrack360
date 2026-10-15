@@ -20,6 +20,8 @@ describe('WorkTrack360 shell', () => {
     expect(dialog).toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: /create work item/i })).toBeDisabled();
     expect(within(dialog).getByText(/sign in and configure the api/i)).toBeInTheDocument();
+    expect(within(dialog).getByRole('combobox', { name: 'Priority' })).toHaveValue('Medium');
+    expect(within(dialog).getByLabelText('Due date')).toHaveAttribute('type', 'date');
   });
 
   it('filters the work table by status without replacing the search query', () => {
