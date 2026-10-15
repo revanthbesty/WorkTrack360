@@ -65,6 +65,24 @@ describe('workItemsApi', () => {
     expect(JSON.parse(String(init.body))).toEqual({ title: 'Test work item' });
   });
 
+  it('patches a work-item status and returns the updated record', async () => {
+    const updated = { ...item, status: 'In progress' };
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(updated), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const result = await workItemsApi.update('test-access-token', item.id, { status: 'In progress' });
+    expect(result.status).toBe('In progress');
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toContain(`/api/v1/work-items/${item.id}`);
+    expect(init.method).toBe('PATCH');
+    expect(JSON.parse(String(init.body))).toEqual({ status: 'In progress' });
+  });
+
   it('returns a safe permission message for forbidden responses', async () => {
     vi.stubGlobal(
       'fetch',
