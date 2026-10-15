@@ -8,6 +8,8 @@ export type WorkItemStatus =
 
 export type WorkItemPriority = 'Low' | 'Medium' | 'High' | 'Urgent';
 
+export interface TeamOption { id: string; name: string; }
+
 export interface WorkItem {
   id: string;
   key: string;
@@ -108,6 +110,9 @@ async function request<T>(
 
 /** Access tokens are passed by the caller and are never persisted by this module. */
 export const workItemsApi = {
+  listTeams(accessToken: string): Promise<TeamOption[]> {
+    return request<TeamOption[]>('/teams', accessToken);
+  },
   list(accessToken: string, limit = 50, offset = 0): Promise<WorkItem[]> {
     const params = new URLSearchParams({
       limit: String(Math.min(100, Math.max(1, Math.trunc(limit)))),
