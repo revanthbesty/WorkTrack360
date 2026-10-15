@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.auth import Principal, current_principal
+from app.auth import Principal, current_principal, require_roles
 from app.database import get_session
 from app.models import AuditEvent, Team, WorkItem
 from app.work_item_schemas import WorkItemCreate, WorkItemRead
@@ -45,7 +45,7 @@ def list_work_items(
 @router.post("", response_model=WorkItemRead, status_code=status.HTTP_201_CREATED)
 def create_work_item(
     payload: WorkItemCreate,
-    principal: Principal = Depends(current_principal),
+    principal: Principal = Depends(require_roles("workspace_admin", "manager", "member")),
     session: Session = Depends(get_session),
 ) -> WorkItem:
     if payload.team_id is not None:
@@ -99,7 +99,7 @@ def get_work_item(
 def update_work_item(
     item_id: UUID,
     payload: WorkItemUpdate,
-    principal: Principal = Depends(current_principal),
+    principal: Principal = Depends(require_roles("workspace_admin", "manager", "member")),
     session: Session = Depends(get_session),
 ) -> WorkItem:
     item = _get_workspace_item(session, principal, item_id)
