@@ -35,6 +35,10 @@ Start the API on `http://127.0.0.1:8000`, then run:
 
 The Vite development server proxies `/api` and `/health` requests to the local FastAPI service. For a separately hosted API, set `VITE_API_BASE_URL` to its public origin and configure the API's exact CORS allowlist. This variable is public configuration, not a secret.
 
+### Optional local PostgreSQL with Docker
+
+If Docker Desktop is already installed, the repository includes a local-only PostgreSQL + API stack. From the repository root, run `docker compose up --build`. The API applies migrations on startup and is available at `http://localhost:8000`; check `http://localhost:8000/health`. In another terminal, run the frontend with `cd frontend`, `npm install`, and `npm run dev`. Stop the services with `docker compose down`; keep the database volume between runs. To reset the local test database completely, use `docker compose down -v` (this deletes local database data). The included database password is for local development only—never reuse it for a hosted environment. Docker is optional; the Python virtual-environment instructions below remain available.
+
 ### Frontend sign-in setup
 
 Copy `frontend/.env.example` to `frontend/.env.local`. Register a **public OIDC client** with your chosen identity provider; use Authorization Code + PKCE, no client secret, and register the exact redirect URI `http://localhost:5173/auth/callback`. Fill `VITE_OIDC_AUTHORITY` and `VITE_OIDC_CLIENT_ID` with the provider's public values. These `VITE_*` settings are shipped to the browser and must never contain secrets. Keep `VITE_API_BASE_URL` empty for local development so Vite proxies requests to the local API. The backend separately needs `OIDC_ISSUER`, `OIDC_AUDIENCE`, and `OIDC_JWKS_URL`, and the access token must include a UUID `workspace_id` claim plus the expected `roles` claim. The identity provider must issue an API access token with an audience accepted by the backend; a generic ID token is not a substitute. Provider-specific claim mapping and API audience configuration are not yet automated.
