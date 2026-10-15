@@ -73,3 +73,15 @@ def test_update_work_item_records_change_for_current_workspace() -> None:
     assert response.status_code == 200
     assert response.json()["title"] == "Updated item"
     assert response.json()["priority"] == "Urgent"
+
+
+def test_cross_workspace_item_cannot_be_updated() -> None:
+    client, _, _, _, hidden_item_id = make_test_client()
+    response = client.patch(f"/api/v1/work-items/{hidden_item_id}", json={"title": "Attempted change"})
+    assert response.status_code == 404
+
+
+def test_invalid_work_item_id_is_rejected() -> None:
+    client, _, _, _, _ = make_test_client()
+    response = client.get("/api/v1/work-items/not-a-uuid")
+    assert response.status_code == 422
