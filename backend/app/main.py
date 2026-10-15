@@ -1,6 +1,8 @@
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from app.auth import Principal, current_principal
 
 
 class Settings(BaseSettings):
@@ -14,8 +16,8 @@ class Settings(BaseSettings):
 settings = Settings()
 app = FastAPI(
     title=settings.app_name,
-    version="0.1.0",
-    description="WorkTrack360 development API. Authentication and tenant authorization are not yet implemented.",
+    version="0.2.0",
+    description="WorkTrack360 API. Protected routes require a configured trusted OIDC provider.",
     docs_url="/docs" if settings.app_env == "development" else None,
     redoc_url=None,
 )
@@ -31,10 +33,20 @@ app.add_middleware(
 @app.get("/health", tags=["operations"])
 def health() -> dict[str, str]:
     """Liveness endpoint; does not expose secrets or database details."""
-    return {"status": "ok", "service": "worktrack360-api", "version": "0.1.0"}
+    return {"status": "ok", "service": "worktrack360-api", "version": "0.2.0"}
 
 
 @app.get(f"{settings.api_prefix}/meta", tags=["operations"])
 def api_meta() -> dict[str, str]:
     """Non-sensitive API metadata for the development frontend."""
-    return {"name": settings.app_name, "environment": settings.app_env, "version": "0.1.0"}
+    return {"name": settings.app_name, "environment": settings.app_env, "version": "0.2.0"}
+
+
+@app.get(f"{settings.api_prefix}/me", tags=["identity"])
+def get_me(principal: Principal = Depends(current_principal)) -> dict[str, object]:
+    """Return minimal identity context after verifying the signed OIDC access token."""
+    return {
+        "subject": principal.subject,
+        "workspace_id": str(principal.workspace_id),
+        "roles": sorted(principal.roles),
+    }
