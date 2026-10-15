@@ -99,6 +99,34 @@ def get_work_item(
     return _get_workspace_item(session, principal, item_id)
 
 
+@router.get("/{item_id}/activity")
+def list_work_item_activity(
+    item_id: UUID,
+    principal: Principal = Depends(require_roles("workspace_admin", "manager", "member", "viewer")),
+    session: Session = Depends(get_session),
+) -> list[dict[str, str | None]]:
+    """Return a minimal, workspace-scoped activity history for one work item."""
+    item = _get_workspace_item(session, principal, item_id)
+    events = session.scalars(
+        select(AuditEvent)
+        .where(
+            AuditEvent.workspace_id == principal.workspace_id,
+            AuditEvent.entity_type == "work_item",
+            AuditEvent.entity_id == item.key,
+        )
+        .order_by(AuditEvent.created_at.desc())
+        .limit(50)
+    ).all()
+    return [
+        {
+            "action": event.action,
+            "actor_subject": event.actor_subject,
+            "created_at": event.created_at.isoformat(),
+        }
+        for event in events
+    ]
+
+
 @router.patch("/{item_id}", response_model=WorkItemRead)
 def update_work_item(
     item_id: UUID,
