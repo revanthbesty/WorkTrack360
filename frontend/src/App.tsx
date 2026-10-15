@@ -50,7 +50,7 @@ export default function App() {
   useEffect(() => {
     let cancelled = false;
     if (!auth.accessToken) {
-      setTasks(sampleTasks.map(t => ({ ...t, id: null, key: t.id })));
+      setTasks(sampleTasks.map(t => ({ ...t, id: null, key: t.id, product: '', category: '', requester: '', owner: '' })));
       setDataMode('sample');
       setDataError(null);
       return () => { cancelled = true; };
@@ -64,7 +64,7 @@ export default function App() {
       if (cancelled) return;
       setDataMode('sample');
       setDataError(error instanceof ApiError ? error.message : 'Could not load live work items. Check the API connection.');
-      setTasks(sampleTasks.map(t => ({ ...t, id: null, key: t.id })));
+      setTasks(sampleTasks.map(t => ({ ...t, id: null, key: t.id, product: '', category: '', requester: '', owner: '' })));
     });
     return () => { cancelled = true; };
   }, [auth.accessToken]);
