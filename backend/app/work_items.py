@@ -1,4 +1,4 @@
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
@@ -13,7 +13,7 @@ from app.work_item_update_schema import WorkItemUpdate
 router = APIRouter(prefix="/work-items", tags=["work-items"])
 
 
-def _get_workspace_item(session: Session, principal: Principal, item_id):
+def _get_workspace_item(session: Session, principal: Principal, item_id: UUID):
     item = session.scalar(
         select(WorkItem).where(
             WorkItem.id == item_id,
@@ -88,7 +88,7 @@ def create_work_item(
 
 @router.get("/{item_id}", response_model=WorkItemRead)
 def get_work_item(
-    item_id,
+    item_id: UUID,
     principal: Principal = Depends(current_principal),
     session: Session = Depends(get_session),
 ) -> WorkItem:
