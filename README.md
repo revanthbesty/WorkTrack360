@@ -12,7 +12,7 @@ A secure, configurable work-management platform. This repository starts the migr
 
 ## Current status
 
-This is an active development foundation, not a production-ready release. The API has an OIDC/JWT verification boundary, a protected identity endpoint, workspace-scoped work-item list/create/read/update routes, and audit events for work-item mutations. A typed frontend API client now defines list, read, create, and update calls, bearer-header handling, bounded pagination, and safe API error messages. Client tests have been added, but execution results have not been verified here.
+This is an active development foundation, not a production-ready release. The API has an OIDC/JWT verification boundary, a protected identity endpoint, workspace-scoped work-item list/create/read/update routes, and audit events for work-item mutations. The frontend has a typed API client for list, read, create, and update operations, plus tests for request authentication handling and error messages. Backend tests now include OIDC token-validation cases. Test execution and CI results have not been verified here.
 
 The dashboard still uses fictional sample records and the frontend is not yet connected to a configured identity provider or live API session. The API client does not persist access tokens; a trusted sign-in integration must supply short-lived access tokens. Configure and test a trusted identity provider, enforce operation-level authorization, validate tenant isolation and migrations, and pass CI/security checks before real or sensitive company data is used. Do not commit secrets or production data.
 
@@ -27,13 +27,13 @@ The dashboard still uses fictional sample records and the frontend is not yet co
 
 ### Frontend
 
-From the repository root:
+Start the API on `http://127.0.0.1:8000`, then run:
 
     cd frontend
     npm install
     npm run dev
 
-Optionally set `VITE_API_BASE_URL` to the API origin when running the frontend locally. This value is public configuration, not a secret. The current dashboard does not yet call the API automatically.
+The Vite development server proxies `/api` and `/health` requests to the local FastAPI service. For a separately hosted API, set `VITE_API_BASE_URL` to its public origin and configure the API's exact CORS allowlist. This variable is public configuration, not a secret.
 
 ### Backend
 
