@@ -13,7 +13,7 @@ describe('WorkTrack360 shell', () => {
 
   it('keeps persistent creation disabled until a trusted session exists', () => {
     render(<AuthProvider><App /></AuthProvider>);
-    fireEvent.click(screen.getByRole('button', { name: /create work item/i }));
+    fireEvent.click(screen.getAllByRole('button', { name: /create work item/i })[0]);
     const dialog = screen.getByRole('dialog', { name: /create a work item/i });
     expect(dialog).toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: /create work item/i })).toBeDisabled();
