@@ -1,9 +1,21 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { AuthProvider } from './auth/AuthProvider';
-import App from './App';
+import App, { escapeCsvCell } from './App';
 
-afterEach(() => cleanup());
+afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
+
+describe('CSV export safety', () => {
+  it.each([
+    ['=1+1', '"\'=1+1"'],
+    ['  +SUM(A1:A2)', '"\'  +SUM(A1:A2)"'],
+    ['-1+2', '"\'-1+2"'],
+    ['@SUM(A1)', '"\'@SUM(A1)"'],
+    ['normal "quoted" text', '"normal ""quoted"" text"'],
+  ])('safely escapes %s', (input, expected) => {
+    expect(escapeCsvCell(input)).toBe(expected);
+  });
+});
 
 describe('WorkTrack360 shell', () => {
   it('renders the accessible product brand and primary navigation', () => {
@@ -77,6 +89,37 @@ describe('WorkTrack360 shell', () => {
     expect(period).toHaveValue('7');
     expect(screen.getByText(/summary calculated from fictional sample work items only/i)).toBeInTheDocument();
     expect(screen.getByText(/does not represent actual team performance/i)).toBeInTheDocument();
+  });
+
+
+  it('exports fictional rows with an explicitly demo-labelled filename', () => {
+    vi.stubGlobal('URL', {
+      createObjectURL: vi.fn(() => 'blob:worktrack360-test'),
+      revokeObjectURL: vi.fn(),
+    });
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) {
+      expect(this.download).toBe('worktrack360-demo-work-items.csv');
+    });
+
+    render(<AuthProvider><App /></AuthProvider>);
+    fireEvent.click(screen.getByRole('button', { name: /export demo csv/i }));
+
+    expect(click).toHaveBeenCalledOnce();
+    expect(URL.createObjectURL).toHaveBeenCalledOnce();
+    expect(URL.revokeObjectURL).toHaveBeenCalledOnce();
+  });
+
+
+  it('derives dashboard counts from the loaded fictional work items', () => {
+    render(<AuthProvider><App /></AuthProvider>);
+    const openCard = screen.getByText('Open work items').closest('article');
+    expect(openCard?.querySelector('.metric-value')).toHaveTextContent('4');
+
+    const customerCard = screen.getByText('Customer-related items').closest('article');
+    expect(customerCard?.querySelector('.metric-value')).toHaveTextContent('1');
+
+    const completionCard = screen.getByText('On-time completion').closest('article');
+    expect(completionCard?.querySelector('.metric-value')).toHaveTextContent('0%');
   });
 
 });
