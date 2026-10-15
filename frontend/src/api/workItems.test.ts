@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ApiError, workItemsApi } from './workItems';
+import { workItemsApi } from './workItems';
 
 const item = {
   id: '2dbdc0f5-8d3e-4f1b-a46a-85b67f15f210',
