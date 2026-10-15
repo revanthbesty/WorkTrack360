@@ -121,6 +121,17 @@ export default function App() {
     return () => { cancelled = true; };
   }, [dataMode, auth.accessToken, liveDataEnabled]);
 
+  async function refreshRecentActivity() {
+    if (!auth.accessToken || !liveDataEnabled) return;
+    try {
+      const items = await workItemsApi.recentActivity(auth.accessToken, 10);
+      setRecentActivityItems(items);
+      setRecentActivityError(null);
+    } catch (error) {
+      setRecentActivityError(error instanceof ApiError ? error.message : 'Could not load recent activity.');
+    }
+  }
+
   async function createWorkItem(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!auth.accessToken || !liveDataEnabled) {
@@ -138,9 +149,11 @@ export default function App() {
       if (editingTask?.id) {
         const updated = await workItemsApi.update(auth.accessToken, editingTask.id, { title, product: newProduct.trim() || null, category: newCategory.trim() || null, requester: newRequester.trim() || null, owner: newOwner.trim() || null, priority: newPriority, due_at: newDueDate ? new Date(`${newDueDate}T23:59:00`).toISOString() : null, team_id: newTeamId || null });
         setTasks(current => current.map(item => item.id === editingTask.id ? toTaskRow(updated, liveTeams.find(team => team.id === updated.team_id)?.name) : item));
+        await refreshRecentActivity();
       } else {
         const created = await workItemsApi.create(auth.accessToken, { title, product: newProduct.trim() || null, category: newCategory.trim() || null, requester: newRequester.trim() || null, owner: newOwner.trim() || null, priority: newPriority, due_at: newDueDate ? new Date(`${newDueDate}T23:59:00`).toISOString() : null, team_id: newTeamId || null });
         setTasks(current => [toTaskRow(created, liveTeams.find(team => team.id === created.team_id)?.name), ...current]);
+        await refreshRecentActivity();
       }
       setDataMode('live');
       setNewTitle(''); setNewProduct(''); setNewCategory(''); setNewRequester(''); setNewOwner(''); setNewDueDate(''); setNewPriority('Medium'); setNewTeamId('');
@@ -161,6 +174,7 @@ export default function App() {
     try {
       const updated = await workItemsApi.update(auth.accessToken, task.id, { status: nextStatus });
       setTasks(current => current.map(item => item.id === task.id ? toTaskRow(updated, liveTeams.find(team => team.id === updated.team_id)?.name) : item));
+      await refreshRecentActivity();
     } catch (error) {
       setTasks(current => current.map(item => item.id === task.id ? { ...item, status: previousStatus } : item));
       setDataError(error instanceof ApiError ? error.message : 'Could not update status. Please try again.');
