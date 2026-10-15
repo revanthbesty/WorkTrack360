@@ -31,7 +31,7 @@ describe('WorkTrack360 shell', () => {
 
   it('filters by product and shows overdue labels using fictional records', () => {
     render(<AuthProvider><App /></AuthProvider>);
-    fireEvent.change(screen.getByRole('combobox', { name: 'Filter by product' }), { target: { value: 'Oxbow' } });
+    fireEvent.change(screen.getByRole('combobox', { name: 'Filter by product' }), { target: { value: 'Orbit Compliance' } });
     expect(screen.getAllByText('Prepare customer demo walkthrough').length).toBeGreaterThan(0);
     expect(screen.queryByText('Review quarterly validation issue')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /clear filters/i }));
