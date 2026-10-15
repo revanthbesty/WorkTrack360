@@ -29,7 +29,7 @@ def _get_workspace_item(session: Session, principal: Principal, item_id: UUID):
 def list_work_items(
     limit: int = Query(default=50, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
-    principal: Principal = Depends(current_principal),
+    principal: Principal = Depends(require_roles("workspace_admin", "manager", "member", "viewer")),
     session: Session = Depends(get_session),
 ) -> list[WorkItem]:
     statement = (
@@ -89,7 +89,7 @@ def create_work_item(
 @router.get("/{item_id}", response_model=WorkItemRead)
 def get_work_item(
     item_id: UUID,
-    principal: Principal = Depends(current_principal),
+    principal: Principal = Depends(require_roles("workspace_admin", "manager", "member", "viewer")),
     session: Session = Depends(get_session),
 ) -> WorkItem:
     return _get_workspace_item(session, principal, item_id)
