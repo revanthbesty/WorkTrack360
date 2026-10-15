@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker
 from app.auth import Principal, current_principal
 from app.database import get_session
 from app.main import app
-from app.models import Base, Team, WorkItem, Workspace
+from app.models import AuditEvent, Base, Team, WorkItem, Workspace
 
 
 def make_test_client():
@@ -171,3 +171,21 @@ def test_team_directory_only_returns_active_teams_from_current_workspace() -> No
     assert response.status_code == 200
     assert [team["name"] for team in response.json()] == ["Demo Support Team"]
     assert all("id" in team for team in response.json())
+
+
+def test_work_item_activity_is_scoped_to_workspace_item() -> None:
+    client, _, workspace_id, visible_item_id, _ = make_test_client()
+    with next(app.dependency_overrides[get_session]()) as session:
+        session.add(AuditEvent(
+            workspace_id=workspace_id,
+            actor_subject="demo-member",
+            action="work_item.updated",
+            entity_type="work_item",
+            entity_id="WT-A1",
+        ))
+        session.commit()
+    response = client.get(f"/api/v1/work-items/{visible_item_id}/activity")
+    assert response.status_code == 200
+    assert response.json()[0]["action"] == "work_item.updated"
+    assert response.json()[0]["actor_subject"] == "demo-member"
+    assert "created_at" in response.json()[0]
