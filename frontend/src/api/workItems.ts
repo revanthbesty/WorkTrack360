@@ -10,6 +10,7 @@ export type WorkItemPriority = 'Low' | 'Medium' | 'High' | 'Urgent';
 
 export interface TeamOption { id: string; name: string; }
 export interface WorkItemActivity { action: string; actor_subject: string | null; created_at: string; }
+export interface RecentWorkItemActivity extends WorkItemActivity { key: string; }
 
 export interface WorkItem {
   id: string;
@@ -120,6 +121,11 @@ export const workItemsApi = {
       offset: String(Math.max(0, Math.trunc(offset))),
     });
     return request<WorkItem[]>(`/work-items?${params.toString()}`, accessToken);
+  },
+
+  recentActivity(accessToken: string, limit = 10): Promise<RecentWorkItemActivity[]> {
+    const boundedLimit = Math.min(50, Math.max(1, Math.trunc(limit)));
+    return request<RecentWorkItemActivity[]>(`/work-items/activity/recent?limit=${boundedLimit}`, accessToken);
   },
 
   activity(accessToken: string, id: string): Promise<WorkItemActivity[]> {
