@@ -1,26 +1,36 @@
 # Security checklist
 
-This is an implementation checklist, not a claim that these controls are complete.
+This checklist records implementation status; it is not a certification or production-readiness claim.
+
+## Implemented foundation
+- [x] OIDC/JWT verification module validates RS256 signature, issuer, audience, expiry and required claims using a configured JWKS endpoint.
+- [x] Protected identity endpoint requires a verified principal.
+- [x] Workspace identity is taken from the signed token's `workspace_id` claim, not a request parameter.
+- [x] Work-item list queries filter by the authenticated workspace.
+- [x] Work-item creation checks that a selected team belongs to the authenticated workspace.
+- [x] Work-item creation records a minimal audit event.
+- [x] Basic API tests cover anonymous access and workspace scoping.
 
 ## Required before multi-user or production use
+- [ ] Configure and test a trusted identity provider; validate the exact issuer, audience, JWKS rotation, and workspace/role claim contract.
+- [ ] Apply role-based authorization to each operation; define workspace membership lifecycle and role grants.
+- [ ] Add PostgreSQL row-level security or equivalent defense-in-depth tenant controls.
+- [ ] Run all tests and CI successfully; add negative tests for invalid, expired, wrong-audience and wrong-issuer tokens.
+- [ ] Add schema migrations to CI and verify migration parity against SQLAlchemy models.
+- [ ] Use least-privilege database roles and production PostgreSQL.
+- [ ] Use secure session/token storage and document the browser token flow; protect against CSRF where applicable.
+- [ ] Restrict CORS to explicit deployed origins and configure TLS.
+- [ ] Add rate limiting, request-size limits, security headers and safe error handling.
+- [ ] Store secrets in deployment secret managers; rotate exposed credentials.
+- [ ] Add dependency scanning, static analysis, accessibility and threat-model reviews.
+- [ ] Configure backups, tested restores, retention, incident response and monitoring.
+- [ ] Complete independent security testing before production.
 
-- [ ] Integrate a trusted identity provider; do not invent a custom password system.
-- [ ] Enforce server-side authentication and role-based authorization on every protected route.
-- [ ] Establish tenant identity from the authenticated server-side principal, never from a trusted client-supplied tenant ID.
-- [ ] Add tenant isolation tests and PostgreSQL row-level security where appropriate.
-- [ ] Add schema migrations and least-privilege database roles.
-- [ ] Validate inputs and constrain pagination, upload sizes and request rates.
-- [ ] Use secure, HttpOnly, SameSite cookies or a documented token strategy; protect against CSRF where applicable.
-- [ ] Restrict CORS to explicit deployed origins.
-- [ ] Add audit events for access and material changes without logging secrets or sensitive payloads.
-- [ ] Store secrets in deployment secret managers; rotate any exposed credentials.
-- [ ] Add dependency scanning, static analysis, and automated API/UI tests.
-- [ ] Configure TLS, backups, tested restore procedures, retention and incident response.
-- [ ] Run accessibility, threat-model and penetration testing before production.
-
-## Current known limitations
-
-- No authentication or authorization is implemented yet.
-- No tenant-aware schema or database migration exists yet.
-- The health endpoint only verifies process liveness; it does not prove database readiness.
-- Development API docs are enabled by default in development mode only.
+## Current limitations
+- Identity-provider settings are empty by default; protected endpoints fail closed until configured.
+- The frontend is not yet connected to the API or a real sign-in flow.
+- The initial migration has not been verified by running Alembic against PostgreSQL in CI.
+- The current API implements only basic work-item list/create operations; updates, deletes, comments, assignments, SLA logic and configuration APIs are not complete.
+- Role-based authorization is not yet applied to work-item write operations.
+- Health checks process liveness only and do not verify database readiness.
+- Do not use real or sensitive company data or expose the service publicly yet.
