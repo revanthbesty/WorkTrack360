@@ -72,7 +72,7 @@ describe('workItemsApi', () => {
     );
 
     await expect(workItemsApi.update('test-access-token', item.id, { title: 'Change' }))
-      .rejects.toMatchObject<ApiError>({
+      .rejects.toMatchObject({
         name: 'ApiError',
         status: 403,
         message: 'You do not have permission to perform this action.',
